@@ -7,18 +7,35 @@ searches, comments, and reacts.
 Built with **Laravel 13**, **Livewire 4**, **Filament 5**, **Tailwind CSS 4**, and **SQLite**
 for local development (Postgres recommended in production).
 
-## Screenshots
+<p align="center">
+  <a href="docs/screenshots/01-home.png">
+    <img src="docs/screenshots/01-home.png" alt="Model Railroad Locator home page" width="720">
+  </a>
+</p>
 
-| Home | Layout directory |
+## Screenies
+
+| Layout directory | Layout detail |
 | --- | --- |
-| ![Home page](docs/screenshots/01-home.png) | ![Layout directory](docs/screenshots/02-layouts.png) |
+| ![Layout directory](docs/screenshots/02-layouts.png) | ![Layout detail](docs/screenshots/03-layout-detail.png) |
 
 | Story editor | Admin panel |
 | --- | --- |
 | ![Story editor](docs/screenshots/08-post-editor.png) | ![Admin panel](docs/screenshots/10-admin-panel.png) |
 
-More captures (layout detail, blog index and post, member profile, club page, layout editor,
-mobile home) live in `docs/screenshots/`.
+All captures in [`docs/screenshots/`](docs/screenshots):
+
+- [Home](docs/screenshots/01-home.png)
+- [Layout directory](docs/screenshots/02-layouts.png)
+- [Layout detail](docs/screenshots/03-layout-detail.png)
+- [Blog index](docs/screenshots/04-blog-index.png)
+- [Blog post](docs/screenshots/05-blog-post.png)
+- [Member profile](docs/screenshots/06-member-profile.png)
+- [Club page](docs/screenshots/07-club-page.png)
+- [Story editor](docs/screenshots/08-post-editor.png)
+- [Layout editor](docs/screenshots/09-layout-editor.png)
+- [Admin panel](docs/screenshots/10-admin-panel.png)
+- [Mobile home](docs/screenshots/11-home-mobile.png)
 
 ## What is included
 
