@@ -1,5 +1,5 @@
 <x-layouts.app :title="$post->title" :description="$post->excerptText(150)">
-    <nav class="text-sm text-stone-500">
+    <nav class="mx-auto max-w-4xl text-sm text-stone-500">
         <a href="{{ route('posts.index') }}" class="hover:text-emerald-800">Stories</a>
         <span class="mx-2">/</span>
         <span class="text-stone-700">{{ $post->title }}</span>

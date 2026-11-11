@@ -7,6 +7,19 @@ searches, comments, and reacts.
 Built with **Laravel 13**, **Livewire 4**, **Filament 5**, **Tailwind CSS 4**, and **SQLite**
 for local development (Postgres recommended in production).
 
+## Screenshots
+
+| Home | Layout directory |
+| --- | --- |
+| ![Home page](docs/screenshots/01-home.png) | ![Layout directory](docs/screenshots/02-layouts.png) |
+
+| Story editor | Admin panel |
+| --- | --- |
+| ![Story editor](docs/screenshots/08-post-editor.png) | ![Admin panel](docs/screenshots/10-admin-panel.png) |
+
+More captures (layout detail, blog index and post, member profile, club page, layout editor,
+mobile home) live in `docs/screenshots/`.
+
 ## What is included
 
 - **Layout directory** with search, scale filters, and "sort by distance" using a portable
