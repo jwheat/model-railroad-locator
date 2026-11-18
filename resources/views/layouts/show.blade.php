@@ -97,6 +97,23 @@
         </div>
     </header>
 
+    @if ($layout->media->where('type', 'image')->isNotEmpty())
+        <section class="mt-10">
+            <h2 class="text-xl font-semibold tracking-tight text-stone-900">Photos</h2>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach ($layout->media->where('type', 'image') as $photo)
+                    <figure class="overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
+                        <img src="{{ $photo->publicUrl() }}" alt="{{ $photo->alt ?: $layout->name }}"
+                             class="h-full w-full object-cover" loading="lazy">
+                        @if ($photo->caption)
+                            <figcaption class="px-4 py-2 text-sm text-stone-600">{{ $photo->caption }}</figcaption>
+                        @endif
+                    </figure>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     <div class="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white px-5 py-4">
         <livewire:reaction-bar reactionable-type="layout" :reactionable-id="$layout->id" />
         <p class="text-sm text-stone-500">Share this layout with your club.</p>

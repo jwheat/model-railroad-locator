@@ -4,8 +4,10 @@ namespace App\Livewire;
 
 use App\LayoutScale;
 use App\LayoutVisibility;
+use App\Livewire\Concerns\ManagesPhotos;
 use App\Models\Layout;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout as LayoutAttribute;
 use Livewire\Attributes\Locked;
@@ -15,7 +17,7 @@ use Livewire\WithFileUploads;
 #[LayoutAttribute('components.layouts.app')]
 class LayoutEditor extends Component
 {
-    use AuthorizesRequests, WithFileUploads;
+    use AuthorizesRequests, ManagesPhotos, WithFileUploads;
 
     #[Locked]
     public ?int $layoutId = null;
@@ -80,6 +82,7 @@ class LayoutEditor extends Component
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'visibility' => ['required', Rule::enum(LayoutVisibility::class)],
             'cover' => ['nullable', 'image', 'max:5120'],
+            ...$this->photoRules(),
         ];
     }
 
@@ -108,21 +111,35 @@ class LayoutEditor extends Component
             'visibility' => $this->visibility,
         ];
 
+        $oldCover = null;
+
         if ($this->cover) {
             $attributes['cover_image_path'] = $this->cover->store('layouts', 'public');
         }
 
         if ($this->layoutId) {
             $layout = Layout::findOrFail($this->layoutId);
+            $oldCover = $layout->cover_image_path;
             $layout->update($attributes);
         } else {
             $layout = auth()->user()->layouts()->create($attributes);
             $this->layoutId = $layout->id;
         }
 
+        if ($this->cover && $oldCover) {
+            Storage::disk('public')->delete($oldCover);
+        }
+
+        $this->syncPhotos('layouts');
+
         session()->flash('status', 'Layout saved.');
 
         $this->redirectRoute('layouts.show', $layout);
+    }
+
+    protected function photoSubject(): ?Layout
+    {
+        return $this->layoutId ? Layout::find($this->layoutId) : null;
     }
 
     public function render()
@@ -130,6 +147,10 @@ class LayoutEditor extends Component
         return view('livewire.layout-editor', [
             'scales' => LayoutScale::options(),
             'visibilities' => LayoutVisibility::options(),
+            'gallery' => $this->photoSubject()?->media()
+                ->where('type', 'image')
+                ->whereNotIn('id', $this->removedPhotoIds)
+                ->get() ?? collect(),
         ]);
     }
 }

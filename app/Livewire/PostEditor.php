@@ -2,11 +2,13 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\ManagesPhotos;
 use App\Models\Club;
 use App\Models\Layout;
 use App\Models\Post;
 use App\PostStatus;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout as LayoutAttribute;
 use Livewire\Attributes\Locked;
@@ -16,7 +18,7 @@ use Livewire\WithFileUploads;
 #[LayoutAttribute('components.layouts.app')]
 class PostEditor extends Component
 {
-    use AuthorizesRequests, WithFileUploads;
+    use AuthorizesRequests, ManagesPhotos, WithFileUploads;
 
     #[Locked]
     public ?int $postId = null;
@@ -68,6 +70,7 @@ class PostEditor extends Component
             'clubId' => ['nullable', 'integer', 'exists:clubs,id'],
             'cover' => ['nullable', 'image', 'max:5120'],
             'videoUrl' => ['nullable', 'url', 'max:2048'],
+            ...$this->photoRules(),
         ];
     }
 
@@ -95,6 +98,8 @@ class PostEditor extends Component
             'published_at' => $publishing ? now() : null,
         ];
 
+        $oldCover = null;
+
         if ($this->cover) {
             $attributes['cover_image_path'] = $this->cover->store('posts', 'public');
         }
@@ -102,12 +107,19 @@ class PostEditor extends Component
         if ($this->postId) {
             $post = Post::findOrFail($this->postId);
             $this->authorize('update', $post);
+            $oldCover = $post->cover_image_path;
             $post->update($attributes);
         } else {
             $this->authorize('create', Post::class);
             $post = auth()->user()->posts()->create($attributes);
             $this->postId = $post->id;
         }
+
+        if ($this->cover && $oldCover) {
+            Storage::disk('public')->delete($oldCover);
+        }
+
+        $this->syncPhotos('posts');
 
         $post->media()->where('type', 'video_embed')->delete();
 
@@ -124,11 +136,20 @@ class PostEditor extends Component
         $this->redirectRoute('posts.show', $post);
     }
 
+    protected function photoSubject(): ?Post
+    {
+        return $this->postId ? Post::find($this->postId) : null;
+    }
+
     public function render()
     {
         return view('livewire.post-editor', [
             'layouts' => Layout::query()->visible()->orderBy('name')->get(['id', 'name']),
             'clubs' => Club::query()->orderBy('name')->get(['id', 'name']),
+            'gallery' => $this->photoSubject()?->media()
+                ->where('type', 'image')
+                ->whereNotIn('id', $this->removedPhotoIds)
+                ->get() ?? collect(),
             'preview' => Str::markdown($this->body, [
                 'html_input' => 'strip',
                 'allow_unsafe_links' => false,

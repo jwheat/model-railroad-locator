@@ -6,7 +6,7 @@
                 {{ $postId ? 'Edit story' : 'Write a story' }}
             </h1>
             <p class="mt-2 max-w-2xl text-sm text-stone-600">
-                Markdown is supported. Raw HTML is stripped for safety. Add a cover photo and an optional video embed.
+                Markdown is supported. Raw HTML is stripped for safety. Add a cover photo, a photo gallery, and an optional video embed.
             </p>
         </div>
         <div class="flex gap-2">
@@ -79,6 +79,8 @@
                 <p wire:loading wire:target="cover" class="mt-1 text-xs text-stone-500">Uploading...</p>
                 @error('cover')<p class="mt-1 text-sm text-rose-700">{{ $message }}</p>@enderror
             </div>
+
+            <x-photo-uploader :photos="$photos" :gallery="$gallery" />
 
             <div>
                 <label for="videoUrl" class="block text-sm font-medium text-stone-700">Video embed URL <span class="text-stone-400">(optional)</span></label>

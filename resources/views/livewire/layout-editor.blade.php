@@ -59,6 +59,8 @@
                 <p wire:loading wire:target="cover" class="mt-1 text-xs text-stone-500">Uploading...</p>
                 @error('cover')<p class="mt-1 text-sm text-rose-700">{{ $message }}</p>@enderror
             </div>
+
+            <x-photo-uploader :photos="$photos" :gallery="$gallery" />
         </div>
 
         <div class="space-y-5 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
