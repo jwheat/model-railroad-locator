@@ -48,6 +48,40 @@ class PublicPagesTest extends TestCase
             ->assertSee('A finished yard');
     }
 
+    public function test_layout_page_renders_its_photo_gallery(): void
+    {
+        $layout = Layout::factory()->create();
+
+        $layout->media()->create([
+            'user_id' => $layout->user_id,
+            'type' => 'image',
+            'disk' => 'public',
+            'path' => 'layouts/gallery-photo.jpg',
+        ]);
+
+        $this->get(route('layouts.show', $layout))
+            ->assertOk()
+            ->assertSee('Photos')
+            ->assertSee('View '.$layout->name.' full screen');
+    }
+
+    public function test_post_page_renders_its_photo_gallery(): void
+    {
+        $post = Post::factory()->create(['title' => 'A finished yard']);
+
+        $post->media()->create([
+            'user_id' => $post->user_id,
+            'type' => 'image',
+            'disk' => 'public',
+            'path' => 'posts/gallery-photo.jpg',
+        ]);
+
+        $this->get(route('posts.show', $post))
+            ->assertOk()
+            ->assertSee('Photos')
+            ->assertSee('View A finished yard full screen');
+    }
+
     public function test_draft_post_is_not_visible_to_guests(): void
     {
         $post = Post::factory()->draft()->create();

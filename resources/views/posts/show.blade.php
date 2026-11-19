@@ -67,17 +67,7 @@
         @if ($post->media->where('type', 'image')->isNotEmpty())
             <section class="mt-10">
                 <h2 class="text-xl font-semibold tracking-tight text-stone-900">Photos</h2>
-                <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                    @foreach ($post->media->where('type', 'image') as $photo)
-                        <figure class="overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
-                            <img src="{{ $photo->publicUrl() }}" alt="{{ $photo->alt ?: $post->title }}"
-                                 class="h-full w-full object-cover" loading="lazy">
-                            @if ($photo->caption)
-                                <figcaption class="px-4 py-2 text-sm text-stone-600">{{ $photo->caption }}</figcaption>
-                            @endif
-                        </figure>
-                    @endforeach
-                </div>
+                <x-photo-gallery :photos="$post->media->where('type', 'image')" :alt="$post->title" grid="sm:grid-cols-2" />
             </section>
         @endif
 
