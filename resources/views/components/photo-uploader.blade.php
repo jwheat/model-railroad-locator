@@ -46,13 +46,20 @@
     @endif
 
     @if ($total < 8)
-        <label x-data="{ dragging: false }"
+        <label x-data="{
+                   dragging: false,
+                   upload(files) {
+                       // Livewire sends a multi-file selection in one request. Upload one at a
+                       // time so the request stays under the server's post_max_size limit.
+                       Array.from(files).forEach((file) => this.$wire.uploadMultiple('photos', [file]));
+                   },
+               }"
                x-on:dragover.prevent="dragging = true"
                x-on:dragleave.prevent="dragging = false"
                x-on:drop.prevent="
                    dragging = false;
                    if ($event.dataTransfer.files.length) {
-                       $wire.uploadMultiple('photos', $event.dataTransfer.files);
+                       upload($event.dataTransfer.files);
                    }
                "
                x-bind:class="dragging ? 'border-emerald-500 bg-emerald-50' : 'border-stone-300 bg-stone-50 hover:border-emerald-400'"
@@ -64,7 +71,13 @@
                 {{ $total > 0 ? 'Add more photos' : 'Drag photos here or click to browse' }}
             </span>
             <span class="text-xs text-stone-500">JPG, PNG, WebP or GIF &middot; up to 5 MB each</span>
-            <input type="file" wire:model="photos" multiple accept="image/*" class="sr-only">
+            <input type="file" multiple accept="image/*" class="sr-only"
+                   x-on:change="
+                       if ($event.target.files.length) {
+                           upload($event.target.files);
+                       }
+                       $event.target.value = '';
+                   ">
         </label>
         <p wire:loading wire:target="photos" class="mt-1 text-xs text-stone-500">Uploading...</p>
     @endif
