@@ -107,6 +107,10 @@
                 </div>
             </div>
 
+            <p class="-mt-1 text-xs text-stone-500">
+                Add coordinates to show this layout on the directory map. "Use my location" fills them in from where you are now.
+            </p>
+
             <div>
                 <label for="visibility" class="block text-sm font-medium text-stone-700">Visibility</label>
                 <select id="visibility" wire:model="visibility"

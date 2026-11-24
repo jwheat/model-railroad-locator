@@ -125,10 +125,42 @@ class Layout extends Model
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->when($withinKm !== null, fn (Builder $query) => $query->whereRaw(
-                "{$haversine} <= ?",
+                "{$haversine} <= CAST(? AS REAL)",
                 [$latitude, $longitude, $latitude, $withinKm],
             ))
             ->orderBy('distance_km');
+    }
+
+    /**
+     * Restrict results to a map viewport. Handles viewports that cross the antimeridian.
+     */
+    public function scopeWithinBounds(Builder $query, float $north, float $south, float $east, float $west): Builder
+    {
+        return $query
+            ->whereBetween('latitude', [$south, $north])
+            ->where(function (Builder $query) use ($east, $west) {
+                if ($west <= $east) {
+                    $query->whereBetween('longitude', [$west, $east]);
+
+                    return;
+                }
+
+                $query->where('longitude', '>=', $west)
+                    ->orWhere('longitude', '<=', $east);
+            });
+    }
+
+    public function distanceLabel(string $unit = 'mi'): ?string
+    {
+        $kilometres = $this->getAttribute('distance_km');
+
+        if ($kilometres === null) {
+            return null;
+        }
+
+        $value = $unit === 'mi' ? (float) $kilometres * 0.621371 : (float) $kilometres;
+
+        return number_format($value, $value < 10 ? 1 : 0).' '.$unit;
     }
 
     public function isPublic(): bool

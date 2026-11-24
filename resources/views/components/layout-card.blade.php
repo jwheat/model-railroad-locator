@@ -1,4 +1,4 @@
-@props(['layout'])
+@props(['layout', 'unit' => 'mi'])
 
 @php
     $gradients = [
@@ -51,6 +51,9 @@
                 Location not shared
             @endif
         </p>
+        @if ($layout->distanceLabel($unit))
+            <p class="text-sm font-medium text-emerald-800">{{ $layout->distanceLabel($unit) }} away</p>
+        @endif
         <p class="mt-auto pt-3 text-sm text-stone-600">
             by <span class="font-medium text-stone-800">{{ $layout->owner->displayName() }}</span>
         </p>

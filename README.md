@@ -39,8 +39,9 @@ All captures in [`docs/screenshots/`](docs/screenshots):
 
 ## What is included
 
-- **Layout directory** with search, scale filters, and "sort by distance" using a portable
-  haversine query (no PostGIS required to run locally).
+- **Layout directory** with search, scale filters, an interactive Leaflet/OpenStreetMap map,
+  viewport-aware markers, and "sort by distance" using a portable haversine query (no PostGIS
+  required to run locally). Distances default to miles with a kilometre toggle.
 - **Member blogs** with a Markdown editor, live preview, draft/publish workflow, cover photos,
   and optional video embeds.
 - **Clubs** with memberships, club pages, layouts, and stories.
@@ -129,10 +130,18 @@ MVP search uses `LIKE` queries scoped through model scopes (`Layout::search()`,
 `Post::search()`). When the directory grows, install Laravel Scout with Meilisearch or
 Typesense and move these scopes to `searchableAs()` / `toSearchableArray()`.
 
-### Distance search
+### Distance search and maps
 
 `Layout::scopeNear()` uses the haversine formula in SQL. It works on SQLite, MySQL, and
-Postgres today. For large datasets, switch to PostGIS:
+Postgres today. The directory map is Leaflet with OpenStreetMap tiles (no API key), fed by
+the same filters as the list. The map asks the server for markers inside its visible bounds
+(`Layout::scopeWithinBounds()`) so marker payloads stay small.
+
+Precise geolocation requires HTTPS (or `localhost`). When the browser will not share a
+location, the map falls back to a coarse IP-based center from [ipinfo.io](https://ipinfo.io)
+(with [ipwho.is](https://ipwho.is) as a fallback) so it still opens near the visitor's area;
+a US-wide view is the final fallback. The approximate lookup is cached in `sessionStorage`
+and is never used for the distance sort unless the visitor picks "Use my location" first. For large datasets, switch to PostGIS:
 
 ```sql
 -- Add to the layouts migration on Postgres
@@ -183,5 +192,5 @@ draft visibility, comments, reactions, layout creation, authorization, and auth.
 ## Not built yet
 
 Email verification, password reset UI, profile editing, notifications, report/flag
-workflows, native apps, ad serving, classifieds, swap meets, and an interactive map.
-The schema and policies are designed so those can be added without reworking the core.
+workflows, native apps, ad serving, classifieds, and swap meets. The schema and policies
+are designed so those can be added without reworking the core.
