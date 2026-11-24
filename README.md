@@ -179,6 +179,7 @@ draft visibility, comments, reactions, layout creation, authorization, and auth.
 
 ## Production checklist
 
+- [ ] Set `APP_VERSION` on each deploy so the footer shows which build is live.
 - [ ] Switch to Postgres, add PostGIS if you want indexed geo queries.
 - [ ] Move media to R2/S3 and process images in a queue.
 - [ ] Run `php artisan queue:work` (or Horizon) for uploads, mail, and future jobs.

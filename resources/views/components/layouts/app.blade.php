@@ -86,7 +86,7 @@
 
     <footer class="mt-16 border-t border-stone-200 bg-white">
         <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-stone-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-            <p>&copy; {{ now()->year }} Model Railroad Locator. Built by hobbyists, for hobbyists.</p>
+            <p>&copy; {{ now()->year }} Model Railroad Locator <span class="text-stone-400">&middot; v{{ config('app.version') }}</span>. Built by hobbyists, for hobbyists.</p>
             <div class="flex flex-wrap gap-4">
                 <a href="{{ route('layouts.index') }}" class="hover:text-stone-900">Browse layouts</a>
                 <a href="{{ route('posts.index') }}" class="hover:text-stone-900">Read stories</a>

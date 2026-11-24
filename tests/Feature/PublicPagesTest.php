@@ -30,6 +30,15 @@ class PublicPagesTest extends TestCase
             ->assertSee('Find a railroad near you');
     }
 
+    public function test_footer_shows_the_configured_app_version(): void
+    {
+        config(['app.version' => '9.9.9']);
+
+        $this->get('/layouts')
+            ->assertOk()
+            ->assertSee('v9.9.9');
+    }
+
     public function test_layout_page_loads_for_public_layout(): void
     {
         $layout = Layout::factory()->create();
