@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Contracts\Auth\PasswordBroker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -83,5 +85,66 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('home');
+    }
+
+    public function showForgotPassword(): View
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function sendResetLink(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        $status = Password::broker()->sendResetLink(['email' => $validated['email']]);
+
+        if ($status === PasswordBroker::RESET_LINK_SENT) {
+            return redirect()->route('login')->with('status', __($status));
+        }
+
+        return back()->withErrors(['email' => __($status)])->onlyInput('email');
+    }
+
+    public function showResetPassword(Request $request, string $token): View
+    {
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => (string) $request->query('email'),
+        ]);
+    }
+
+    public function resetPassword(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $status = Password::broker()->reset(
+            [
+                'email' => $validated['email'],
+                'token' => $validated['token'],
+                'password' => $validated['password'],
+            ],
+            function ($user, string $password) {
+                $user->forceFill(['password' => $password])->save();
+            },
+        );
+
+        if ($status === PasswordBroker::PASSWORD_RESET) {
+            $user = User::where('email', $validated['email'])->first();
+
+            if ($user) {
+                Auth::login($user);
+                $request->session()->regenerate();
+            }
+        }
+
+        return redirect()
+            ->route('login')
+            ->with('status', $status === PasswordBroker::PASSWORD_RESET ? 'Your password has been reset. Please sign in.' : __($status));
     }
 }

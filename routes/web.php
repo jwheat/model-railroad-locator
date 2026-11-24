@@ -11,6 +11,7 @@ use App\Livewire\LayoutEditor;
 use App\Livewire\NotificationInbox;
 use App\Livewire\NotificationPreferences;
 use App\Livewire\PostEditor;
+use App\Livewire\ProfileEditor;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -31,6 +32,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.store');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {
@@ -41,6 +47,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/account/notifications', NotificationInbox::class)->name('notifications.index');
     Route::get('/account/notifications/preferences', NotificationPreferences::class)->name('notifications.preferences');
+    Route::get('/account/profile', ProfileEditor::class)->name('account.profile');
 });
 
 Route::get('/notifications/unsubscribe/{user}/{type}', NotificationUnsubscribeController::class)

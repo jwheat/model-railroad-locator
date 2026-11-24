@@ -82,11 +82,15 @@ Then open <http://localhost:8000>.
 
 ### Demo accounts
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Admin | `admin@example.com` | `password` |
-| Member | `marta@example.com` | `password` |
-| Member | `dev@example.com` | `password` |
+These accounts are created only for the local development database by `php artisan migrate --seed`, and are for the dev site only. Do not use them in production.
+
+| Role | Name | Email | Password |
+| --- | --- | --- | --- |
+| Admin | Casey Jordan | `admin@example.com` | `password` |
+| Member | Marta Reyes | `marta@example.com` | `password` |
+| Member | Dev Patel | `dev@example.com` | `password` |
+| Member | Ellen Brooks | `ellen@example.com` | `password` |
+| Member | Sam Whitfield | `sam@example.com` | `password` |
 
 The admin account can access `/admin`. Every seeded member uses `password`.
 
@@ -103,7 +107,10 @@ The admin account can access `/admin`. Every seeded member uses `password`.
 | `/clubs/{slug}` | Club page, members, layouts, stories |
 | `/account/notifications` | Notification inbox (auth) |
 | `/account/notifications/preferences` | Email notification preferences (auth) |
+| `/account/profile` | Edit own profile, avatar, and location (auth) |
 | `/notifications/unsubscribe/{user}/{type}` | One-click unsubscribe from a signed email link |
+| `/forgot-password` | Request a password reset email (guest) |
+| `/reset-password/{token}` | Reset password with a token (guest) |
 | `/stories/new` | Write a story (auth) |
 | `/stories/{post}/edit` | Edit a story (auth, owner or admin) |
 | `/layouts/new` | Add a layout (auth) |
@@ -132,6 +139,14 @@ Follows are polymorphic (`followable_type` / `followable_id`), so a member can f
 `Layout`, `Club`, or another `User` with one table. Notifications use Laravel's standard
 `notifications` table, and each member has opt-out flags plus a `digest_sent_at` watermark
 for the weekly digest.
+
+### Account
+
+- The header links to `/account/profile`, a Livewire page where members edit their display
+  name, bio, location, and avatar. Avatars upload to the `public` disk under `avatars`.
+- Password reset uses the framework broker: `POST /forgot-password` sends a `ResetPassword`
+  notification, and `POST /reset-password` validates the token, updates the password, and
+  signs the member back in.
 
 ## Architecture notes
 
@@ -207,7 +222,8 @@ php artisan test
 ```
 
 The suite covers public pages, layout browsing/filtering/distance, story creation,
-draft visibility, comments, reactions, layout creation, authorization, and auth.
+draft visibility, comments, reactions, layout creation, follows, notifications, profile
+editing, password reset, authorization, and auth.
 
 ## Production checklist
 
@@ -217,8 +233,7 @@ draft visibility, comments, reactions, layout creation, authorization, and auth.
 - [ ] Run `php artisan queue:work` (or Horizon) for uploads, mail, and queued notifications.
 - [ ] Run the scheduler (`php artisan schedule:work`, or a cron entry for `schedule:run`) so the
       weekly follow digest goes out.
-- [ ] Add email verification and password reset mail.
-- [ ] Add a moderation queue (reports/flags), spam protection, and a DMCA agent.
+- [ ] Add email verification, report/flag workflows, spam protection, and a DMCA agent.
 - [ ] Add Terms of Service, privacy policy, and a content policy.
 - [ ] Configure backups and monitoring.
 - [ ] Add advertising/sponsorship inventory (Stripe + simple ad-slot tables) and, later,
@@ -226,6 +241,5 @@ draft visibility, comments, reactions, layout creation, authorization, and auth.
 
 ## Not built yet
 
-Email verification, password reset UI, profile editing, report/flag workflows, native apps,
-ad serving, classifieds, and swap meets. The schema and policies are designed so those can
-be added without reworking the core.
+Email verification, report/flag workflows, native apps, ad serving, classifieds, and swap
+meets. The schema and policies are designed so those can be added without reworking the core.

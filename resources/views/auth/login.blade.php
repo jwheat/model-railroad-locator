@@ -31,6 +31,9 @@
                 New here?
                 <a href="{{ route('register') }}" class="font-semibold text-emerald-800 hover:underline">Create a free account</a>
             </p>
+            <p class="mt-2 text-center text-sm text-stone-500">
+                <a href="{{ route('password.request') }}" class="font-semibold text-emerald-800 hover:underline">Forgot your password?</a>
+            </p>
         </div>
     </div>
 </x-layouts.app>

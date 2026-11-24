@@ -25,6 +25,10 @@
                    class="rounded-xl border border-stone-200 px-4 py-2.5 text-center text-sm font-semibold text-stone-700 hover:bg-stone-50">
                     Add a layout
                 </a>
+                <a href="{{ route('account.profile') }}"
+                   class="rounded-xl border border-stone-200 px-4 py-2.5 text-center text-sm font-semibold text-stone-700 hover:bg-stone-50">
+                    Edit profile
+                </a>
             </div>
         @else
             <livewire:follow-button followable-type="member" :followable-id="$member->id" />
