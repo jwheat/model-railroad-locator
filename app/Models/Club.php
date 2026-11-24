@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Followable;
 use App\Models\Concerns\HasUniqueSlug;
 use Database\Factories\ClubFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\Storage;
 class Club extends Model
 {
     /** @use HasFactory<ClubFactory> */
-    use HasFactory, HasUniqueSlug;
+    use Followable, HasFactory, HasUniqueSlug;
 
     protected function casts(): array
     {

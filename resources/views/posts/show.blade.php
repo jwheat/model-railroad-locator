@@ -40,12 +40,15 @@
                         <span class="block text-xs text-stone-500">{{ '@'.$post->author->username }}</span>
                     </span>
                 </a>
-                @can('update', $post)
-                    <a href="{{ route('posts.edit', $post) }}"
-                       class="rounded-xl border border-stone-200 px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50">
-                        Edit story
-                    </a>
-                @endcan
+                <div class="flex flex-wrap items-center gap-3">
+                    <livewire:follow-button followable-type="member" :followable-id="$post->author->id" />
+                    @can('update', $post)
+                        <a href="{{ route('posts.edit', $post) }}"
+                           class="rounded-xl border border-stone-200 px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50">
+                            Edit story
+                        </a>
+                    @endcan
+                </div>
             </div>
         </header>
 
@@ -97,7 +100,7 @@
         </div>
 
         @if ($post->allow_comments)
-            <section class="mt-10">
+            <section class="mt-10" id="comments">
                 <h2 class="text-xl font-semibold tracking-tight text-stone-900">Comments</h2>
                 <livewire:comments commentable-type="post" :commentable-id="$post->id" />
             </section>

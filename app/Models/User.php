@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Followable;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -27,12 +28,16 @@ use Illuminate\Support\Str;
     'city',
     'region',
     'country',
+    'notify_comments',
+    'notify_replies',
+    'notify_follow_digest',
+    'digest_sent_at',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use Followable, HasFactory, Notifiable;
 
     public function canAccessPanel(Panel $panel): bool
     {
@@ -45,6 +50,10 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'notify_comments' => 'boolean',
+            'notify_replies' => 'boolean',
+            'notify_follow_digest' => 'boolean',
+            'digest_sent_at' => 'datetime',
         ];
     }
 
@@ -110,5 +119,15 @@ class User extends Authenticatable implements FilamentUser
     public function reactions(): HasMany
     {
         return $this->hasMany(Reaction::class);
+    }
+
+    public function follows(): HasMany
+    {
+        return $this->hasMany(Follow::class);
+    }
+
+    public function wantsNotification(string $preference): bool
+    {
+        return (bool) ($this->getAttribute('notify_'.$preference) ?? true);
     }
 }

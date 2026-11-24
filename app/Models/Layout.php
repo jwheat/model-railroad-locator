@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\LayoutScale;
 use App\LayoutVisibility;
+use App\Models\Concerns\Followable;
 use App\Models\Concerns\HasUniqueSlug;
 use Database\Factories\LayoutFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -36,7 +37,7 @@ use Illuminate\Support\Facades\Storage;
 class Layout extends Model
 {
     /** @use HasFactory<LayoutFactory> */
-    use HasFactory, HasUniqueSlug;
+    use Followable, HasFactory, HasUniqueSlug;
 
     protected function casts(): array
     {

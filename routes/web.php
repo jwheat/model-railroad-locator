@@ -5,8 +5,11 @@ use App\Http\Controllers\ClubController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LayoutController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\NotificationUnsubscribeController;
 use App\Http\Controllers\PostController;
 use App\Livewire\LayoutEditor;
+use App\Livewire\NotificationInbox;
+use App\Livewire\NotificationPreferences;
 use App\Livewire\PostEditor;
 use Illuminate\Support\Facades\Route;
 
@@ -35,4 +38,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/stories/new', PostEditor::class)->name('posts.create');
     Route::get('/stories/{post}/edit', PostEditor::class)->name('posts.edit');
+
+    Route::get('/account/notifications', NotificationInbox::class)->name('notifications.index');
+    Route::get('/account/notifications/preferences', NotificationPreferences::class)->name('notifications.preferences');
 });
+
+Route::get('/notifications/unsubscribe/{user}/{type}', NotificationUnsubscribeController::class)
+    ->middleware('signed')
+    ->name('notifications.unsubscribe');

@@ -80,6 +80,7 @@
                     <p class="text-2xl font-semibold text-stone-900">{{ $layout->posts_count }}</p>
                     <p class="text-sm text-stone-500">{{ Str::plural('build report', $layout->posts_count) }} published</p>
                 </div>
+                <livewire:follow-button followable-type="layout" :followable-id="$layout->id" />
                 @if ($layout->latitude && $layout->longitude)
                     <a href="https://www.openstreetmap.org/?mlat={{ $layout->latitude }}&mlon={{ $layout->longitude }}#map=13/{{ $layout->latitude }}/{{ $layout->longitude }}"
                        target="_blank" rel="noopener"
@@ -130,7 +131,7 @@
         @endif
     </section>
 
-    <section class="mt-12">
+    <section class="mt-12" id="comments">
         <h2 class="text-xl font-semibold tracking-tight text-stone-900">Comments</h2>
         <livewire:comments commentable-type="layout" :commentable-id="$layout->id" />
     </section>

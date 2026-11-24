@@ -53,6 +53,7 @@
                     @if (auth()->user()->isAdmin())
                         <a href="/admin" class="hidden text-stone-300 hover:text-white sm:inline">Admin</a>
                     @endif
+                    <livewire:notification-bell />
                     <a href="{{ route('members.show', auth()->user()) }}" class="flex items-center gap-2 text-stone-200 hover:text-white">
                         <x-avatar :user="auth()->user()" size="sm" />
                         <span class="hidden sm:inline">{{ auth()->user()->displayName() }}</span>

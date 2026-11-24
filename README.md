@@ -45,6 +45,9 @@ All captures in [`docs/screenshots/`](docs/screenshots):
 - **Member blogs** with a Markdown editor, live preview, draft/publish workflow, cover photos,
   and optional video embeds.
 - **Clubs** with memberships, club pages, layouts, and stories.
+- **Follows and notifications** — follow layouts, clubs, and members, get in-app notifications for
+  comments and replies, and receive a weekly email digest of new stories from the railroads you
+  follow. Queued notifications are delivered by the queue worker; the digest runs on the scheduler.
 - **Comments** with one level of replies, author/moderation deletion, and soft deletes.
 - **Reactions** (like, love, haha, wow, sad, angry) with one reaction per member per item.
 - **Profiles** at `/members/{username}` showing each member's layouts and stories.
@@ -98,6 +101,9 @@ The admin account can access `/admin`. Every seeded member uses `password`.
 | `/blog/{slug}` | Story detail, reactions, comments |
 | `/members/{username}` | Member profile, layouts, stories |
 | `/clubs/{slug}` | Club page, members, layouts, stories |
+| `/account/notifications` | Notification inbox (auth) |
+| `/account/notifications/preferences` | Email notification preferences (auth) |
+| `/notifications/unsubscribe/{user}/{type}` | One-click unsubscribe from a signed email link |
 | `/stories/new` | Write a story (auth) |
 | `/stories/{post}/edit` | Edit a story (auth, owner or admin) |
 | `/layouts/new` | Add a layout (auth) |
@@ -121,6 +127,11 @@ User ──< ClubMembership >── Club
 
 Key migrations live in `database/migrations`. Enums (`LayoutScale`, `LayoutVisibility`,
 `PostStatus`, `ReactionType`, `MembershipRole`) live in `app/`.
+
+Follows are polymorphic (`followable_type` / `followable_id`), so a member can follow a
+`Layout`, `Club`, or another `User` with one table. Notifications use Laravel's standard
+`notifications` table, and each member has opt-out flags plus a `digest_sent_at` watermark
+for the weekly digest.
 
 ## Architecture notes
 
@@ -168,6 +179,27 @@ Then replace the scope with `ST_DWithin(location, ST_MakePoint(?, ?)::geography,
   can moderate).
 - Filament access is restricted by `User::canAccessPanel()`, which requires `is_admin`.
 
+### Follows and notifications
+
+- `App\Models\Concerns\Followable` gives `Layout`, `Club`, and `User` a `followers()` relation
+  and an `isFollowedBy()` helper. `FollowButton` toggles follows from any of those pages.
+- `CommentObserver` sends a `NewCommentNotification` to the content owner and a
+  `ReplyNotification` to the parent comment author. It never notifies the commenter about
+  their own comment, and it de-duplicates when the owner and parent author are the same person.
+- Notifications implement `ShouldQueue` and use the `database` + `mail` channels, so they run
+  on the queue worker. Each member can turn off the email channel while keeping in-app
+  notifications; email links include a signed one-click unsubscribe route.
+- `php artisan notifications:follow-digest` gathers published stories since each member's
+  `digest_sent_at` watermark and sends one `FollowDigestNotification` per member. It is
+  scheduled weekly (Mondays at 08:00) in `routes/console.php`.
+- The in-app inbox marks notifications read on visit, and the header bell polls once a minute.
+
+Run the digest manually with:
+
+```bash
+php artisan notifications:follow-digest
+```
+
 ## Testing
 
 ```bash
@@ -182,7 +214,9 @@ draft visibility, comments, reactions, layout creation, authorization, and auth.
 - [ ] Set `APP_VERSION` on each deploy so the footer shows which build is live.
 - [ ] Switch to Postgres, add PostGIS if you want indexed geo queries.
 - [ ] Move media to R2/S3 and process images in a queue.
-- [ ] Run `php artisan queue:work` (or Horizon) for uploads, mail, and future jobs.
+- [ ] Run `php artisan queue:work` (or Horizon) for uploads, mail, and queued notifications.
+- [ ] Run the scheduler (`php artisan schedule:work`, or a cron entry for `schedule:run`) so the
+      weekly follow digest goes out.
 - [ ] Add email verification and password reset mail.
 - [ ] Add a moderation queue (reports/flags), spam protection, and a DMCA agent.
 - [ ] Add Terms of Service, privacy policy, and a content policy.
@@ -192,6 +226,6 @@ draft visibility, comments, reactions, layout creation, authorization, and auth.
 
 ## Not built yet
 
-Email verification, password reset UI, profile editing, notifications, report/flag
-workflows, native apps, ad serving, classifieds, and swap meets. The schema and policies
-are designed so those can be added without reworking the core.
+Email verification, password reset UI, profile editing, report/flag workflows, native apps,
+ad serving, classifieds, and swap meets. The schema and policies are designed so those can
+be added without reworking the core.

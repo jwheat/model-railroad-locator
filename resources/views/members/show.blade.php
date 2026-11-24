@@ -26,6 +26,8 @@
                     Add a layout
                 </a>
             </div>
+        @else
+            <livewire:follow-button followable-type="member" :followable-id="$member->id" />
         @endif
     </header>
 

@@ -332,16 +332,18 @@ class DatabaseSeeder extends Seeder
             [$posts[4], $marta, 'A 4% grade in G scale is a rite of passage.', null],
         ];
 
-        foreach ($comments as [$post, $user, $body, $parent]) {
-            Comment::create([
-                'commentable_type' => Post::class,
-                'commentable_id' => $post->id,
-                'user_id' => $user->id,
-                'parent_id' => $parent?->id,
-                'body' => $body,
-                'created_at' => now()->subDays(random_int(1, 20)),
-            ]);
-        }
+        Comment::withoutEvents(function () use ($comments) {
+            foreach ($comments as [$post, $user, $body, $parent]) {
+                Comment::create([
+                    'commentable_type' => Post::class,
+                    'commentable_id' => $post->id,
+                    'user_id' => $user->id,
+                    'parent_id' => $parent?->id,
+                    'body' => $body,
+                    'created_at' => now()->subDays(random_int(1, 20)),
+                ]);
+            }
+        });
 
         $reactions = [
             [$posts[0], $marta, ReactionType::Love],
@@ -381,6 +383,19 @@ class DatabaseSeeder extends Seeder
                 'user_id' => $user->id,
                 'type' => $type,
             ]);
+        }
+
+        $follows = [
+            [$marta, $layouts['cascade-valley-western']],
+            [$ellen, $layouts['cascade-valley-western']],
+            [$admin, $layouts['tidewater-belt-line']],
+            [$dev, $layouts['mountain-goat-route']],
+            [$sam, $cascade],
+            [$marta, $dev],
+        ];
+
+        foreach ($follows as [$user, $followable]) {
+            $followable->followers()->firstOrCreate(['user_id' => $user->id]);
         }
 
         $this->command->info('Seeded demo data. Sign in as admin@example.com / password.');

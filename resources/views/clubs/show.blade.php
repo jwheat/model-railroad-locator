@@ -25,9 +25,12 @@
                 <p class="mt-4 max-w-2xl leading-7 text-stone-700">{{ $club->description }}</p>
             @endif
         </div>
-        <div class="shrink-0 rounded-2xl bg-stone-100 px-5 py-4 text-center">
-            <p class="text-2xl font-semibold text-stone-900">{{ $club->members->count() }}</p>
-            <p class="text-sm text-stone-500">{{ Str::plural('member', $club->members->count()) }}</p>
+        <div class="flex shrink-0 flex-col gap-3">
+            <div class="rounded-2xl bg-stone-100 px-5 py-4 text-center">
+                <p class="text-2xl font-semibold text-stone-900">{{ $club->members->count() }}</p>
+                <p class="text-sm text-stone-500">{{ Str::plural('member', $club->members->count()) }}</p>
+            </div>
+            <livewire:follow-button followable-type="club" :followable-id="$club->id" />
         </div>
     </header>
 
