@@ -223,7 +223,7 @@ php artisan test
 
 The suite covers public pages, layout browsing/filtering/distance, story creation,
 draft visibility, comments, reactions, layout creation, follows, notifications, profile
-editing, password reset, authorization, and auth.
+editing, password reset, authorization, admin panel, and auth.
 
 ## Production checklist
 
