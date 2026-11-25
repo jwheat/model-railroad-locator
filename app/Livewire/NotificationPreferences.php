@@ -25,7 +25,7 @@ class NotificationPreferences extends Component
 
     public function save(): void
     {
-        auth()->user()->forceFill([
+        auth()->user()->fill([
             'notify_comments' => $this->comments,
             'notify_replies' => $this->replies,
             'notify_follow_digest' => $this->digest,

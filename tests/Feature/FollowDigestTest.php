@@ -38,6 +38,54 @@ class FollowDigestTest extends TestCase
         $this->assertNotNull($follower->fresh()->digest_sent_at);
     }
 
+    public function test_digest_is_delivered_via_the_database_and_mail_channels_to_opted_in_followers(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $follower = User::factory()->create();
+        $layout = Layout::factory()->create(['user_id' => $owner->id]);
+        $layout->followers()->create(['user_id' => $follower->id]);
+
+        Post::factory()->create([
+            'user_id' => $owner->id,
+            'layout_id' => $layout->id,
+            'status' => PostStatus::Published,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->artisan('notifications:follow-digest')->assertSuccessful();
+
+        Notification::assertSentTo(
+            $follower,
+            FollowDigestNotification::class,
+            fn (FollowDigestNotification $notification, array $channels) => $channels === ['database', 'mail'],
+        );
+    }
+
+    public function test_members_without_follows_do_not_receive_a_digest(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $follower = User::factory()->create();
+        $stranger = User::factory()->create();
+        $layout = Layout::factory()->create(['user_id' => $owner->id]);
+        $layout->followers()->create(['user_id' => $follower->id]);
+
+        Post::factory()->create([
+            'user_id' => $owner->id,
+            'layout_id' => $layout->id,
+            'status' => PostStatus::Published,
+            'published_at' => now()->subDay(),
+        ]);
+
+        $this->artisan('notifications:follow-digest')->assertSuccessful();
+
+        Notification::assertSentTo($follower, FollowDigestNotification::class);
+        Notification::assertNotSentTo($stranger, FollowDigestNotification::class);
+    }
+
     public function test_following_a_club_or_member_also_triggers_a_digest(): void
     {
         Notification::fake();

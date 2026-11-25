@@ -24,6 +24,7 @@ class SendFollowDigest extends Command
         User::query()
             ->where('notify_follow_digest', true)
             ->whereHas('follows')
+            ->with(['follows'])
             ->chunkById(100, function (Collection $users) use (&$queued) {
                 foreach ($users as $user) {
                     $since = $user->digest_sent_at ?? now()->subWeek();
@@ -34,7 +35,7 @@ class SendFollowDigest extends Command
                         $queued++;
                     }
 
-                    $user->forceFill(['digest_sent_at' => now()])->save();
+                    $user->fill(['digest_sent_at' => now()])->save();
                 }
             });
 
@@ -48,17 +49,11 @@ class SendFollowDigest extends Command
      */
     private function newPostsFor(User $user, Carbon $since): Collection
     {
-        $layoutIds = $user->follows()
-            ->where('followable_type', Layout::class)
-            ->pluck('followable_id');
+        $follows = $user->follows;
 
-        $clubIds = $user->follows()
-            ->where('followable_type', Club::class)
-            ->pluck('followable_id');
-
-        $memberIds = $user->follows()
-            ->where('followable_type', User::class)
-            ->pluck('followable_id');
+        $layoutIds = $follows->where('followable_type', Layout::class)->pluck('followable_id');
+        $clubIds = $follows->where('followable_type', Club::class)->pluck('followable_id');
+        $memberIds = $follows->where('followable_type', User::class)->pluck('followable_id');
 
         return Post::query()
             ->published()

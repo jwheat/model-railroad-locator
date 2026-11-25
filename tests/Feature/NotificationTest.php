@@ -102,6 +102,31 @@ class NotificationTest extends TestCase
         Notification::assertNothingSent();
     }
 
+    public function test_members_are_not_notified_about_their_own_replies(): void
+    {
+        Notification::fake();
+
+        $post = Post::factory()->create();
+        $member = User::factory()->create();
+
+        $parent = Comment::factory()->create([
+            'commentable_type' => Post::class,
+            'commentable_id' => $post->id,
+            'user_id' => $member->id,
+        ]);
+
+        Livewire::actingAs($member)
+            ->test(Comments::class, [
+                'commentableType' => 'post',
+                'commentableId' => $post->id,
+            ])
+            ->set('body', 'An update to my own build report.')
+            ->set('replyTo', $parent->id)
+            ->call('addComment');
+
+        Notification::assertNotSentTo($member, ReplyNotification::class);
+    }
+
     public function test_comment_email_can_be_disabled_while_database_notifications_remain(): void
     {
         Notification::fake();
